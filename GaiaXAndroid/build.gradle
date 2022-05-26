@@ -132,6 +132,12 @@ dependencies {
     
 }
 
+//dokkaHtml {
+//    outputDirectory.set(file("$buildDir/GaiaXApiDocs"))
+//
+//    moduleName.set("GaiaX")
+//}
+
 publishing {
     publications {
         maven(MavenPublication) {
@@ -139,12 +145,6 @@ publishing {
         }
     }
 }
-
-//dokkaHtml {
-//    outputDirectory.set(file("$buildDir/GaiaXApiDocs"))
-//
-//    moduleName.set("GaiaX")
-//}
 
 afterEvaluate {
     publishing {
