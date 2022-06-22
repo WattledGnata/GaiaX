@@ -299,10 +299,7 @@ JNIEXPORT jlong JNICALL
 Java_com_alibaba_gaiax_analyze_GXAnalyze_00024Companion_createValueFloat64(JNIEnv *env,
                                                                            jobject thiz,
                                                                            jfloat value) {
-    GXValue *result;
-    GXValue val = GX_NewFloat64(value);
-    result = (GXValue *) malloc(sizeof(val));
-    memcpy(result, &val, sizeof(val));
+    GXValue *result = new GXValue(GX_TAG_FLOAT, value);
     return (jlong) result;
 }
 extern "C"
@@ -322,11 +319,11 @@ JNIEXPORT jstring JNICALL
 Java_com_alibaba_gaiax_analyze_GXAnalyze_00024Companion_getValueString(JNIEnv *env, jobject thiz,
                                                                        jlong value) {
     GXValue *val = (GXValue *) value;
-    const char *str = GX_ToCString(*val);
+    const char *str = (*val).str;
     jstring j_str = env->NewStringUTF(str);
-    if (val->tag == GX_TAG_STRING && val->u.str != NULL) {
-        delete[]val->u.str;
-        val->u.str = NULL;
+    if (val->tag == GX_TAG_STRING && val->str != NULL) {
+        delete[]val->str;
+        val->str = NULL;
     }
     return j_str;
 }
@@ -336,66 +333,57 @@ JNIEXPORT jobject JNICALL
 Java_com_alibaba_gaiax_analyze_GXAnalyze_00024Companion_getValueArray(JNIEnv *env, jobject thiz,
                                                                       jlong value) {
     GXValue *val = (GXValue *) value;
-    return static_cast<jobject>GX_VALUE_GET_OBJECT(*val);;
+    return static_cast<jobject>(GX_VALUE_GET_OBJECT(*val));
 }
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_alibaba_gaiax_analyze_GXAnalyze_00024Companion_getValueMap(JNIEnv *env, jobject thiz,
                                                                     jlong value) {
     GXValue *val = (GXValue *) value;
-    return static_cast<jobject>GX_VALUE_GET_OBJECT(*val);;
+    return static_cast<jobject>(GX_VALUE_GET_OBJECT(*val));
 }
 
 extern "C"
 JNIEXPORT jlong JNICALL
 Java_com_alibaba_gaiax_analyze_GXAnalyze_00024Companion_createValueString(JNIEnv *env, jobject thiz,
                                                                           jstring value) {
-    GXValue *result;
-    GXValue val = GX_NewGXString(jstring2str(env, value).c_str());
-    result = (GXValue *) malloc(sizeof(val));
-    memcpy(result, &val, sizeof(val));
+    GXValue *result = new GXValue(GX_TAG_STRING, jstring2str(env, value).c_str());
     return (jlong) result;
 }
 extern "C"
 JNIEXPORT jlong JNICALL
 Java_com_alibaba_gaiax_analyze_GXAnalyze_00024Companion_createValueBool(JNIEnv *env, jobject thiz,
                                                                         jboolean value) {
-    GXValue *result;
-    GXValue val = GX_NewBool(value);
-    result = (GXValue *) malloc(sizeof(val));
-    memcpy(result, &val, sizeof(val));
+    GXValue *result = new GXValue(GX_TAG_BOOL, value);
     return (jlong) result;
 }
 extern "C"
 JNIEXPORT jlong JNICALL
 Java_com_alibaba_gaiax_analyze_GXAnalyze_00024Companion_createValueArray(JNIEnv *env, jobject thiz,
                                                                          jobject value) {
-    GXValue *result;
     //必须持有引用，否则会释放掉指针
     jobject ref = env->NewWeakGlobalRef(value);
-    GXValue val = GX_NewArray(ref);
-    result = (GXValue *) malloc(sizeof(val));
-    memcpy(result, &val, sizeof(val));
+    GXValue *result = new GXValue(GX_TAG_ARRAY, ref);
     return (jlong) result;
 }
 extern "C"
 JNIEXPORT jlong JNICALL
 Java_com_alibaba_gaiax_analyze_GXAnalyze_00024Companion_createValueMap(JNIEnv *env, jobject thiz,
                                                                        jobject value) {
-    GXValue *result;
     //必须持有引用，否则会释放掉指针
     jobject ref = env->NewWeakGlobalRef(value);
-    GXValue val = GX_NewMap(ref);
-    result = (GXValue *) malloc(sizeof(val));
-    memcpy(result, &val, sizeof(val));
+    GXValue *result = new GXValue(GX_TAG_MAP, ref);
     return (jlong) result;
 }
 extern "C"
 JNIEXPORT jlong JNICALL
 Java_com_alibaba_gaiax_analyze_GXAnalyze_00024Companion_createValueNull(JNIEnv *env, jobject thiz) {
-    GXValue *result;
-    GXValue val = GX_NewNull(1);
-    result = (GXValue *) malloc(sizeof(val));
-    memcpy(result, &val, sizeof(val));
+    GXValue *result = new GXValue(GX_TAG_NULL, 1);
     return (jlong) result;
+}
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_alibaba_gaiax_analyze_GXAnalyze_00024Companion_releaseGXValue(JNIEnv *env, jobject thiz,
+                                                                       jlong value) {
+    releaseGXValue(value);
 }
