@@ -25,7 +25,7 @@
         //解析结果
         result = [self parserValue:(*value)];
     }
-    
+    releaseGXValue(adress);
     return result;
 }
 
@@ -46,12 +46,11 @@
         }
             break;
         case GX_TAG_STRING:{
-            const char *cString = GX_ToCString(value);
-            NSString *stringValue = [NSString stringWithUTF8String:cString];
+            NSString *stringValue = [NSString stringWithUTF8String:value.str];
             result = [GXStr getResultByValue:stringValue];
-            if(value.tag == GX_TAG_STRING && value.u.str !=NULL){
-                delete[]value.u.str;
-                value.u.str = NULL;
+            if(value.tag == GX_TAG_STRING && value.str !=NULL){
+                delete[]value.str;
+                value.str = NULL;
             }
         }
             break;
@@ -77,7 +76,7 @@
 
 + (long)getAdressWithValue:(id)value{
     
-    GXValue val;
+    GXValue *val;
     
     if ([value isKindOfClass:[NSNumber class]]) {
         //number类型
@@ -94,7 +93,6 @@
         //string类型
         NSString *string = (NSString *)value;
         val = GX_NewGXString([string UTF8String]);
-        
     } else if ([value isKindOfClass:[NSArray class]]){
         //array类型
         val = GX_NewArray((__bridge void*)value);
@@ -107,12 +105,6 @@
         //未知类型，返回null
         val = GX_NewNull(0);
     }
-    
-    //生成安全返回值
-    GXValue *result  = (GXValue *) malloc(sizeof(val));
-    memcpy(result, &val, sizeof(val));
-    
-    return (long)(result);
+        return (long)(val);
 }
-
 @end
