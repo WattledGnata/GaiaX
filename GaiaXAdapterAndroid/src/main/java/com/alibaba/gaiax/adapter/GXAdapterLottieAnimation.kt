@@ -35,7 +35,7 @@ import com.alibaba.gaiax.template.animation.GXLottieAnimation
 import com.alibaba.gaiax.template.factory.GXExpressionFactory
 import com.alibaba.gaiax.utils.setValueExt
 
-class GXAdapterLottieAnimation : GXLottieAnimation() {
+internal class GXAdapterLottieAnimation : GXLottieAnimation() {
 
     override fun executeAnimation(
         gxState: GXIExpression?,
@@ -44,13 +44,11 @@ class GXAdapterLottieAnimation : GXLottieAnimation() {
         gxNode: GXNode,
         gxTemplateData: JSONObject
     ) {
-        val lottieContainer = (gxNode.view as? ViewGroup) ?: return
         val gxAnimationData = gxAnimationExpression?.value(gxTemplateData) as? JSONObject
 
         val remoteUri = this.gxRemoteUri?.value(gxTemplateData) as? String
         if (remoteUri != null) {
             remotePlay(
-                lottieContainer,
                 gxTemplateContext,
                 gxNode,
                 gxTemplateData,
@@ -65,7 +63,6 @@ class GXAdapterLottieAnimation : GXLottieAnimation() {
         val localUri = this.gxLocalUri?.value(gxTemplateData) as? String
         if (localUri != null) {
             localPlay(
-                lottieContainer,
                 gxTemplateContext,
                 gxNode,
                 gxTemplateData,
@@ -85,18 +82,6 @@ class GXAdapterLottieAnimation : GXLottieAnimation() {
         return value
     }
 
-    private fun localCreateLottieView(context: Context): LottieAnimationView {
-        val lottieView: LottieAnimationView = LayoutInflater.from(context)
-            .inflate(R.layout.gaiax_inner_lottie_auto_play, null) as LottieAnimationView
-        lottieView.layoutParams = AbsoluteLayout.LayoutParams(
-            AbsoluteLayout.LayoutParams.MATCH_PARENT,
-            AbsoluteLayout.LayoutParams.MATCH_PARENT,
-            0,
-            0
-        )
-        return lottieView
-    }
-
     private fun localInitLottieLocalResourceDir(value: String, lottieView: LottieAnimationView) {
         val dirIndex = value.indexOf("/")
         if (dirIndex > 0) {
@@ -108,7 +93,6 @@ class GXAdapterLottieAnimation : GXLottieAnimation() {
     }
 
     private fun localPlay(
-        lottieContainer: ViewGroup,
         gxTemplateContext: GXTemplateContext,
         gxNode: GXNode,
         gxTemplateData: JSONObject,
@@ -117,12 +101,7 @@ class GXAdapterLottieAnimation : GXLottieAnimation() {
         localUri: String,
         loopCount: Int
     ) {
-        val lottieView: LottieAnimationView? = if (lottieContainer.childCount == 0) {
-            localCreateLottieView(lottieContainer.context)
-        } else {
-            lottieContainer.getChildAt(0) as? LottieAnimationView
-        }
-
+        val lottieView: LottieAnimationView? = gxNode.lottieView as? LottieAnimationView
         if (lottieView?.isAnimating == true || gxNode.isAnimating) {
             return
         }
@@ -170,28 +149,11 @@ class GXAdapterLottieAnimation : GXLottieAnimation() {
             }
 
         })
+        lottieView.isClickable = false
         lottieView.playAnimation()
-
-        if (lottieContainer.childCount == 0) {
-            lottieView.isClickable = false
-            lottieContainer.addView(lottieView)
-        }
-    }
-
-    private fun remoteCreateLottieView(context: Context): LottieAnimationView {
-        val lottieView: LottieAnimationView = LayoutInflater.from(context)
-            .inflate(R.layout.gaiax_inner_lottie_auto_play, null) as LottieAnimationView
-        lottieView.layoutParams = AbsoluteLayout.LayoutParams(
-            AbsoluteLayout.LayoutParams.MATCH_PARENT,
-            AbsoluteLayout.LayoutParams.MATCH_PARENT,
-            0,
-            0
-        )
-        return lottieView
     }
 
     private fun remotePlay(
-        lottieContainer: ViewGroup,
         gxTemplateContext: GXTemplateContext,
         gxNode: GXNode,
         gxTemplateData: JSONObject,
@@ -200,11 +162,7 @@ class GXAdapterLottieAnimation : GXLottieAnimation() {
         remoteUri: String,
         loopCount: Int
     ) {
-        val lottieView: LottieAnimationView? = if (lottieContainer.childCount == 0) {
-            remoteCreateLottieView(lottieContainer.context)
-        } else {
-            lottieContainer.getChildAt(0) as? LottieAnimationView
-        }
+        val lottieView: LottieAnimationView? = gxNode.lottieView as? LottieAnimationView
 
         if (lottieView?.isAnimating == true || gxNode.isAnimating) {
             return
@@ -261,14 +219,10 @@ class GXAdapterLottieAnimation : GXLottieAnimation() {
                                 })
                         }
                     })
+                    lottieView.isClickable = false
                     lottieView.playAnimation()
                 }
             }
         })
-
-        if (lottieContainer.childCount == 0) {
-            lottieView.isClickable = false
-            lottieContainer.addView(lottieView)
-        }
     }
 }

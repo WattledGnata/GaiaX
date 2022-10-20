@@ -23,4 +23,17 @@ class GXExtensionLottieAnimation : GXRegisterCenter.GXIExtensionLottieAnimation 
     override fun create(): GXLottieAnimation {
         return GXAdapterLottieAnimation()
     }
+
+
+    override fun localCreateLottieView(context: Context): View {
+        val lottieView: LottieAnimationView = LayoutInflater.from(context)
+            .inflate(R.layout.zhtemplate_gaiax_inner_lottie_auto_play, null) as LottieAnimationView
+        lottieView.layoutParams = AbsoluteLayout.LayoutParams(
+            AbsoluteLayout.LayoutParams.MATCH_PARENT,
+            AbsoluteLayout.LayoutParams.MATCH_PARENT,
+            0,
+            0
+        )
+        return lottieView
+    }
 }
